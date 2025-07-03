@@ -1,0 +1,92 @@
+Got it! Here’s a cleaned-up, professional version of your original Monetag instructions, rewritten specifically to be copy-pasted directly into an AI tool or shared with a developer to build your Telegram Mini App — using only the exact Monetag code and data you were given.
+
+📄 Task: Build Telegram Mini App Using Monetag Ads (Exact Integration)
+
+🔧 Objective:
+
+Build a Telegram Mini App (WebApp) that integrates Monetag Rewarded Ads using the exact SDK, script tag, and ad functions provided by Monetag. The app must include two ad formats:
+	1.	Rewarded Interstitial
+	2.	Rewarded Popup
+
+Do not include In-Page Push or In-App Interstitial in the UI.
+
+📌 Integration Instructions (As Provided by Monetag)
+
+✅ 1. Install the SDK
+
+Add this tag right below the <head> tag of the HTML page:
+
+<script src='//libtl.com/sdk.js' data-zone='9524219' data-sdk='show_9524219'></script>
+
+✅ 2. Implement Ad Formats
+
+📺 Rewarded Interstitial
+
+Full-screen ad with a banner. User sees banner, clicks it, and goes to an offer page. User should be rewarded after watching the ad.
+
+Paste this code anywhere in the Mini App and call the function when a user clicks a button:
+
+// Rewarded interstitial
+show_9524219().then(() => {
+    // You need to add your user reward function here, which will be executed after the user watches the ad.
+    // For more details, please refer to the detailed instructions.
+    alert('You have seen an ad!');
+})
+
+⚡ Rewarded Popup
+
+When user clicks the ad button, they’re redirected directly to the offer page (no banner shown). They get the reward after watching.
+
+Paste this code anywhere in the app and call it from a second button:
+
+// Rewarded Popup
+show_9524219('pop').then(() => {
+    // user watch ad till the end or close it in interstitial format
+    // your code to reward user for rewarded format
+}).catch(e => {
+    // user get error during playing ad
+    // do nothing or whatever you want
+})
+
+❌ No need to include this format:
+
+// In-App Interstitial
+show_9524219({
+  type: 'inApp',
+  inAppSettings: {
+    frequency: 2,
+    capping: 0.1,
+    interval: 30,
+    timeout: 5,
+    everyPage: false
+  }
+})
+
+	In-Page Push was tested but did not deliver high enough CPM. Do not include it.
+
+🧠 UX Guidelines
+	•	Show two buttons:
+	1.	“Watch Ad (Rewarded Interstitial)”
+	2.	“Watch Ad (Rewarded Popup)”
+	•	When the user finishes watching the ad (promise is resolved), show an alert or message:
+✅ You watched the ad. Reward granted!
+	•	Also send a message back to the Telegram bot using:
+
+Telegram.WebApp.sendData('reward_granted');
+
+
+
+This allows the Telegram bot to reward the user (e.g. coins, unlock features, etc).
+
+📲 Telegram Integration
+	•	Call Telegram.WebApp.ready() when the page loads.
+	•	Use Telegram.WebApp.sendData() to send reward info back to the bot.
+
+✅ Summary of What to Build
+	•	1 HTML + JS page (Mini App)
+	•	Uses Monetag SDK zone 9524219
+	•	Implements both Rewarded Interstitial and Rewarded Popup
+	•	On ad complete, shows confirmation + sends reward_granted back to Telegram
+	•	Clean, mobile-friendly layout
+
+Would you like me to give you a ready-made HTML file example with this exact code and layout?
