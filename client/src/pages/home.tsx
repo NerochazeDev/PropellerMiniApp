@@ -29,6 +29,7 @@ export default function Home() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // User creation/fetching
   const createUserMutation = useMutation({
@@ -38,11 +39,22 @@ export default function Home() {
         body: JSON.stringify(userData),
         headers: { "Content-Type": "application/json" },
       });
+      if (!response.ok) {
+        throw new Error(`Failed to create user: ${response.statusText}`);
+      }
       return await response.json();
     },
     onSuccess: (data: any) => {
       setCurrentUser(data.user);
+      setIsInitializing(false);
+      console.log("✅ User initialized:", data.user);
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+    },
+    onError: (error: any) => {
+      console.error("User creation failed:", error);
+      setErrorMessage(`Failed to initialize user: ${error.message}`);
+      setShowError(true);
+      setIsInitializing(false);
     },
   });
 
@@ -70,16 +82,27 @@ export default function Home() {
 
   // Initialize user on component mount
   useEffect(() => {
-    if (isReady && webApp?.initDataUnsafe?.user) {
-      const telegramUser = webApp.initDataUnsafe.user;
-      const telegramId = telegramUser.id?.toString();
-      const username = telegramUser.username || `user_${telegramId}`;
-      
-      createUserMutation.mutate({
-        username,
-        password: "telegram_user",
-        telegramId,
-      });
+    if (isReady) {
+      if (webApp?.initDataUnsafe?.user) {
+        // Real Telegram user
+        const telegramUser = webApp.initDataUnsafe.user;
+        const telegramId = telegramUser.id?.toString();
+        const username = telegramUser.username || `user_${telegramId}`;
+        
+        createUserMutation.mutate({
+          username,
+          password: "telegram_user",
+          telegramId,
+        });
+      } else {
+        // Demo user for testing/browser mode
+        const demoUserId = Date.now().toString();
+        createUserMutation.mutate({
+          username: `demo_user_${demoUserId}`,
+          password: "demo_password",
+          telegramId: demoUserId,
+        });
+      }
     }
   }, [isReady, webApp]);
 
@@ -134,7 +157,7 @@ export default function Home() {
     }
   };
 
-  if (!isReady) {
+  if (!isReady || isInitializing) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center">
@@ -144,7 +167,14 @@ export default function Home() {
               <Rocket className="w-6 h-6 text-white animate-pulse" />
             </div>
           </div>
-          <p className="text-white/80 text-lg font-medium">Initializing...</p>
+          <p className="text-white/80 text-lg font-medium">
+            {!isReady ? "Initializing..." : "Setting up your account..."}
+          </p>
+          {currentUser && (
+            <p className="text-white/60 text-sm mt-2">
+              Welcome, {currentUser.username}!
+            </p>
+          )}
         </div>
       </div>
     );
