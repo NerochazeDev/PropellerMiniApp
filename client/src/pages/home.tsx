@@ -80,14 +80,14 @@ export default function Home() {
     },
   });
 
-  // Initialize user on component mount
+  // Initialize user on component mount - ONLY real Telegram users
   useEffect(() => {
     if (isReady) {
       if (webApp?.initDataUnsafe?.user) {
-        // Real Telegram user
+        // Real Telegram user only
         const telegramUser = webApp.initDataUnsafe.user;
         const telegramId = telegramUser.id?.toString();
-        const username = telegramUser.username || `user_${telegramId}`;
+        const username = telegramUser.username || telegramUser.first_name || `user_${telegramId}`;
         
         createUserMutation.mutate({
           username,
@@ -95,13 +95,10 @@ export default function Home() {
           telegramId,
         });
       } else {
-        // Demo user for testing/browser mode
-        const demoUserId = Date.now().toString();
-        createUserMutation.mutate({
-          username: `demo_user_${demoUserId}`,
-          password: "demo_password",
-          telegramId: demoUserId,
-        });
+        // No demo users - show error for non-Telegram access
+        setErrorMessage("This app only works in Telegram. Please open it from Telegram.");
+        setShowError(true);
+        setIsInitializing(false);
       }
     }
   }, [isReady, webApp]);
@@ -168,7 +165,7 @@ export default function Home() {
             </div>
           </div>
           <p className="text-white/80 text-lg font-medium">
-            {!isReady ? "Initializing..." : "Setting up your account..."}
+            {!isReady ? "Connecting to Telegram..." : "Validating authentic user..."}
           </p>
           {currentUser && (
             <p className="text-white/60 text-sm mt-2">

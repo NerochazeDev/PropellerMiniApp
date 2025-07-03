@@ -47,10 +47,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Monetag ad view tracking with validation
+  // Monetag ad view tracking with strict validation - ONLY real Telegram users
   app.post('/api/earnings/ad-view', async (req, res) => {
     try {
-      const { userId, adType, rewardAmount, telegramId } = req.body;
+      const { userId, adType, rewardAmount, telegramId, telegramInitData } = req.body;
       
       // Validate required fields
       if (!userId || !adType || !rewardAmount) {
@@ -68,10 +68,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid reward amount. Must be between $0.001 and $0.003' });
       }
       
-      // Verify user exists
+      // Verify user exists and has valid Telegram ID
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      
+      if (!user.telegramId) {
+        return res.status(403).json({ success: false, message: 'Only Telegram users can earn rewards' });
+      }
+      
+      // Rate limiting: Check if user is not spamming ads (max 1 ad per 30 seconds)
+      const recentAdViews = await storage.getUserAdViews(userId);
+      if (recentAdViews.length > 0) {
+        const lastAdView = recentAdViews[0];
+        const lastAdTime = lastAdView.completedAt ? new Date(lastAdView.completedAt).getTime() : 0;
+        const timeSinceLastAd = Date.now() - lastAdTime;
+        const minimumInterval = 30 * 1000; // 30 seconds
+        
+        if (timeSinceLastAd < minimumInterval) {
+          return res.status(429).json({ 
+            success: false, 
+            message: 'Please wait 30 seconds between ad views to prevent fraud',
+            waitTime: Math.ceil((minimumInterval - timeSinceLastAd) / 1000)
+          });
+        }
+      }
+      
+      // Daily limit check (max 50 ads per day per user to prevent abuse)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayAdViews = recentAdViews.filter(adView => {
+        const adViewTime = adView.completedAt ? new Date(adView.completedAt) : new Date(0);
+        return adViewTime >= today;
+      });
+      
+      if (todayAdViews.length >= 50) {
+        return res.status(429).json({ 
+          success: false, 
+          message: 'Daily limit reached. You can watch up to 50 ads per day.'
+        });
       }
       
       // Record the ad view
@@ -84,7 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedAdView = insertAdViewSchema.parse(adViewData);
       const adView = await storage.recordAdView(validatedAdView);
       
-      console.log(`✅ Monetag Ad View: User ${userId} watched ${adType} ad, earned $${rewardAmount}`);
+      console.log(`✅ Authenticated Monetag Ad View: Telegram User ${user.telegramId} (${user.username}) watched ${adType} ad, earned $${rewardAmount}`);
       
       // Get updated user data
       const updatedUser = await storage.getUser(userId);

@@ -24,11 +24,8 @@ export function useMonetag() {
         });
         return { success: true };
       } else {
-        // SDK not loaded - simulate for demo in browser mode
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        console.log('Demo mode: Simulated Rewarded Interstitial ad view');
-        sendData('reward_granted');
-        return { success: true };
+        // Monetag SDK not loaded - this is required for real ads
+        throw new Error('Monetag SDK not loaded. Please refresh the page or check your connection.');
       }
     } catch (error) {
       console.error('Rewarded Interstitial error:', error);
@@ -55,11 +52,8 @@ export function useMonetag() {
         });
         return { success: true };
       } else {
-        // SDK not loaded - simulate for demo in browser mode
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        console.log('Demo mode: Simulated Rewarded Popup ad view');
-        sendData('reward_granted');
-        return { success: true };
+        // Monetag SDK not loaded - this is required for real ads
+        throw new Error('Monetag SDK not loaded. Please refresh the page or check your connection.');
       }
     } catch (error) {
       console.error('Rewarded Popup error:', error);
@@ -86,8 +80,8 @@ export function useMonetag() {
         console.log('In-App Interstitial: Automatic ad display activated');
         return { success: true };
       } else {
-        console.log('Demo mode: In-App Interstitial would be automatically displayed');
-        return { success: true };
+        // Monetag SDK not loaded - this is required for real ads
+        throw new Error('Monetag SDK not loaded. Please refresh the page or check your connection.');
       }
     } catch (error) {
       console.error('In-App Interstitial error:', error);
