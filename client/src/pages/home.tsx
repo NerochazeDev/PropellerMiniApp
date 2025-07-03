@@ -13,8 +13,8 @@ export default function Home() {
   const { isReady, isInTelegram } = useTelegram();
   const { isLoading, showRewardedInterstitial, showRewardedPopup } = useMonetag();
   
-  const [totalRewards, setTotalRewards] = useState(0);
-  const [adsWatched, setAdsWatched] = useState(0);
+  const [totalRewards, setTotalRewards] = useState(1.56);
+  const [adsWatched, setAdsWatched] = useState(98);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
 
@@ -42,7 +42,7 @@ export default function Home() {
         : await showRewardedPopup();
       
       if (result.success) {
-        setTotalRewards(prev => prev + 10);
+        setTotalRewards(prev => prev + 0.003);
         setAdsWatched(prev => prev + 1);
         setShowSuccess(true);
       } else {
@@ -139,7 +139,7 @@ export default function Home() {
         <MessageCard
           type="success"
           title="Reward Granted!"
-          message="You watched the ad successfully and earned 10 rewards!"
+          message="You watched the ad successfully and earned $0.003!"
           show={showSuccess}
         />
 

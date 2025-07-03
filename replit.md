@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Telegram Mini App built with React and Express that integrates Monetag SDK for rewarded advertising. The application allows users to watch ads through two different formats (Rewarded Interstitial and Rewarded Popup) and earn rewards. The app is designed to run as a WebApp within Telegram's ecosystem.
+This is a Telegram Mini App built with React and Express that integrates Monetag SDK for rewarded advertising. The application allows users to watch ads through two different formats (Rewarded Interstitial and Rewarded Popup) and earn realistic rewards ($0.001-$0.003 per ad). Features include USDT TRC20 crypto withdrawals, 5% referral commission system, and comprehensive earnings tracking. The app is designed to run as a WebApp within Telegram's ecosystem.
 
 ## System Architecture
 
@@ -90,6 +90,9 @@ This is a Telegram Mini App built with React and Express that integrates Monetag
 - July 03, 2025. Removed Replit banner for clean production appearance
 - July 03, 2025. Enhanced UI with advanced animations and modern design
 - July 03, 2025. Added gradient backgrounds, glass effects, and interactive animations
+- July 03, 2025. Implemented realistic earnings system with USDT TRC20 withdrawal support
+- July 03, 2025. Updated all earning amounts to reflect PropellerAds/Monetag realistic rates
+- July 03, 2025. Configured withdrawal system to only support USDT TRC20 with $1 minimum
 
 ## User Preferences
 

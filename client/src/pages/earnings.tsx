@@ -18,29 +18,29 @@ import { Link } from "wouter";
 export default function Earnings() {
   // Mock data - in real app this would come from API
   const [userStats] = useState({
-    totalRewards: 145.50,
+    totalRewards: 1.45,
     adsWatched: 87,
     level: 3,
     experience: 240,
     referrals: 12,
     achievements: 8,
     referralCode: "USER12345",
-    totalEarned: 75.50,
-    referralBonus: 5
+    totalEarned: 0.75,
+    referralBonus: 0.05
   });
 
   const [withdrawals] = useState([
     {
       id: 1,
-      amount: 25.00,
-      method: "PayPal",
+      amount: 1.25,
+      walletAddress: "TG3XXyExBkPp3nzdRJ8keq7fey4L2vLsj1",
       status: "approved" as const,
       requestedAt: "Jan 15, 2025"
     },
     {
       id: 2,
-      amount: 50.00,
-      method: "Crypto",
+      amount: 2.50,
+      walletAddress: "TLsV52sRDL79HXGGm9yzwKibbQzH18pQKn",
       status: "pending" as const,
       requestedAt: "Jan 20, 2025"
     }
@@ -156,7 +156,7 @@ export default function Earnings() {
               totalReferrals={userStats.referrals}
               totalEarned={userStats.totalEarned}
               referralBonus={userStats.referralBonus}
-              totalCommissions={13.14}
+              totalCommissions={0.13}
               commissionRate={0.05}
               recentReferrals={recentReferrals}
             />

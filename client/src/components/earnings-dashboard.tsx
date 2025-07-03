@@ -143,7 +143,7 @@ export function EarningsDashboard({
               <div className="text-sm text-gray-600 dark:text-gray-400">Ads watched today</div>
             </div>
             <div className="text-right">
-              <div className="text-lg font-semibold text-green-600">+$2.00</div>
+              <div className="text-lg font-semibold text-green-600">+$0.05</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Bonus reward</div>
             </div>
           </div>
@@ -183,8 +183,8 @@ export function EarningsDashboard({
                 <Eye className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <div className="font-semibold">Watch Ads</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">$0.10 - $0.25 per ad</div>
+                <div className="font-semibold">Watch Rewarded Ads</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">$0.001 - $0.005 per ad</div>
               </div>
             </div>
             <ArrowUpRight className="w-5 h-5 text-blue-600" />
@@ -197,7 +197,7 @@ export function EarningsDashboard({
               </div>
               <div>
                 <div className="font-semibold">Refer Friends</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">$5.00 per referral</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">$0.05 signup + 5% commission</div>
               </div>
             </div>
             <ArrowUpRight className="w-5 h-5 text-green-600" />
@@ -209,8 +209,8 @@ export function EarningsDashboard({
                 <Award className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <div className="font-semibold">Complete Achievements</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">$1.00 - $10.00 bonus</div>
+                <div className="font-semibold">Daily Streaks</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">$0.01 - $0.10 bonus</div>
               </div>
             </div>
             <ArrowUpRight className="w-5 h-5 text-purple-600" />

@@ -23,7 +23,7 @@ interface WithdrawalSystemProps {
   pendingWithdrawals: Array<{
     id: number;
     amount: number;
-    method: string;
+    walletAddress: string;
     status: 'pending' | 'approved' | 'rejected';
     requestedAt: string;
   }>;
@@ -31,14 +31,14 @@ interface WithdrawalSystemProps {
 
 export function WithdrawalSystem({ 
   balance, 
-  minimumWithdrawal = 10,
+  minimumWithdrawal = 1,
   pendingWithdrawals = []
 }: WithdrawalSystemProps) {
   const [amount, setAmount] = useState("");
-  const [method, setMethod] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canWithdraw = parseFloat(amount) >= minimumWithdrawal && parseFloat(amount) <= balance;
+  const canWithdraw = parseFloat(amount) >= minimumWithdrawal && parseFloat(amount) <= balance && walletAddress.length > 0;
 
   const handleWithdrawal = async () => {
     if (!canWithdraw) return;
@@ -48,7 +48,7 @@ export function WithdrawalSystem({
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsSubmitting(false);
     setAmount("");
-    setMethod("");
+    setWalletAddress("");
   };
 
   const getStatusIcon = (status: string) => {
@@ -127,37 +127,26 @@ export function WithdrawalSystem({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="method">Payment Method</Label>
-            <Select value={method} onValueChange={setMethod}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select payment method" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="paypal">
-                  <div className="flex items-center space-x-2">
-                    <CreditCard className="w-4 h-4" />
-                    <span>PayPal</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="crypto">
-                  <div className="flex items-center space-x-2">
-                    <Bitcoin className="w-4 h-4" />
-                    <span>Cryptocurrency</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="bank">
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4" />
-                    <span>Bank Transfer</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="wallet">USDT TRC20 Wallet Address</Label>
+            <Input
+              id="wallet"
+              type="text"
+              placeholder="Enter your USDT TRC20 wallet address"
+              value={walletAddress}
+              onChange={(e) => setWalletAddress(e.target.value)}
+              className="font-mono text-sm"
+            />
+            {walletAddress && walletAddress.length < 34 && (
+              <div className="flex items-center space-x-2 text-red-600 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                <span>Please enter a valid TRC20 wallet address</span>
+              </div>
+            )}
           </div>
 
           <Button 
             onClick={handleWithdrawal}
-            disabled={!canWithdraw || !method || isSubmitting}
+            disabled={!canWithdraw || isSubmitting}
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
           >
             {isSubmitting ? (
@@ -172,43 +161,59 @@ export function WithdrawalSystem({
         </CardContent>
       </Card>
 
-      {/* Payment Methods Info */}
-      <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+      {/* USDT TRC20 Info */}
+      <Card className="border-0 shadow-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
         <CardHeader>
-          <CardTitle className="text-lg">Payment Methods</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <Bitcoin className="w-5 h-5 text-green-600" />
+            <span>USDT TRC20 Withdrawals</span>
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border">
-            <div className="flex items-center space-x-3">
-              <CreditCard className="w-5 h-5 text-blue-600" />
+          <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-800">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <Bitcoin className="w-6 h-6 text-green-600" />
+              </div>
               <div>
-                <div className="font-semibold">PayPal</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Instant transfer</div>
+                <div className="font-bold text-green-800 dark:text-green-200">USDT TRC20 Only</div>
+                <div className="text-sm text-green-600 dark:text-green-400">Fast & secure crypto withdrawals</div>
               </div>
             </div>
-            <div className="text-sm text-green-600 font-semibold">Free</div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Network:</span>
+                <span className="font-semibold">TRON (TRC20)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Processing time:</span>
+                <span className="font-semibold">5-30 minutes</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Network fee:</span>
+                <span className="font-semibold text-green-600">Free</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Minimum withdrawal:</span>
+                <span className="font-semibold">${minimumWithdrawal}</span>
+              </div>
+            </div>
           </div>
-
-          <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border">
-            <div className="flex items-center space-x-3">
-              <Bitcoin className="w-5 h-5 text-orange-600" />
-              <div>
-                <div className="font-semibold">Cryptocurrency</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">1-2 hours</div>
+          
+          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+            <div className="flex items-start space-x-2">
+              <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+              <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                <div className="font-semibold mb-1">Important:</div>
+                <ul className="space-y-1 text-xs">
+                  <li>• Only send to TRC20 USDT addresses</li>
+                  <li>• Double-check your wallet address</li>
+                  <li>• Transactions are irreversible</li>
+                  <li>• Contact support if you need help</li>
+                </ul>
               </div>
             </div>
-            <div className="text-sm text-green-600 font-semibold">Free</div>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border">
-            <div className="flex items-center space-x-3">
-              <DollarSign className="w-5 h-5 text-green-600" />
-              <div>
-                <div className="font-semibold">Bank Transfer</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">3-5 business days</div>
-              </div>
-            </div>
-            <div className="text-sm text-blue-600 font-semibold">$2 fee</div>
           </div>
         </CardContent>
       </Card>
@@ -230,7 +235,7 @@ export function WithdrawalSystem({
                   <div>
                     <div className="font-semibold">${withdrawal.amount}</div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {withdrawal.method} • {withdrawal.requestedAt}
+                      {withdrawal.walletAddress.slice(0, 6)}...{withdrawal.walletAddress.slice(-4)} • {withdrawal.requestedAt}
                     </div>
                   </div>
                 </div>
