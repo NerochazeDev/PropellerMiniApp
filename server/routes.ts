@@ -4,6 +4,11 @@ import { storage } from "./storage";
 import { handleWithdrawalRequest, handleWithdrawalStatus } from "./withdrawal-handler";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve admin dashboard
+  app.get('/admin', (req, res) => {
+    res.sendFile('admin-dashboard.html', { root: '.' });
+  });
+
   // Withdrawal processing routes
   app.post('/api/withdrawals', handleWithdrawalRequest);
   app.get('/api/withdrawals/:withdrawalId', handleWithdrawalStatus);
