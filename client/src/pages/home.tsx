@@ -5,7 +5,9 @@ import { StatusCard } from "@/components/status-card";
 import { AdButton } from "@/components/ad-button";
 import { MessageCard } from "@/components/message-card";
 import { Card, CardContent } from "@/components/ui/card";
-import { Rocket, Star, Crown, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Rocket, Star, Crown, Zap, TrendingUp, Wallet } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Home() {
   const { isReady, isInTelegram } = useTelegram();
@@ -148,6 +150,20 @@ export default function Home() {
           show={showError}
         />
 
+        {/* Earnings Hub Button */}
+        <Link href="/earnings">
+          <Button className="w-full mt-6 py-6 bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-bold text-lg shadow-2xl hover-lift">
+            <div className="flex items-center justify-center space-x-3">
+              <Wallet className="w-6 h-6" />
+              <div className="text-center">
+                <div>Earnings Hub</div>
+                <div className="text-sm text-white/80">Manage withdrawals & referrals</div>
+              </div>
+              <TrendingUp className="w-6 h-6" />
+            </div>
+          </Button>
+        </Link>
+
         {/* Advanced Instructions Card */}
         <Card className="mt-8 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/20 shadow-2xl hover-lift">
           <CardContent className="p-6">
@@ -171,6 +187,10 @@ export default function Home() {
               <li className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }}></div>
                 <span>Rewards are sent to your Telegram bot</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+                <span>Refer friends and earn 5% commission from their earnings</span>
               </li>
             </ul>
           </CardContent>
