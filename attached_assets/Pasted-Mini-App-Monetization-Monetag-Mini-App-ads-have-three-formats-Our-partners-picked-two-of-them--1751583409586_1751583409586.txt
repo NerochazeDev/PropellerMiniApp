@@ -1,0 +1,79 @@
+Mini App Monetization
+Monetag Mini App ads have three formats. Our partners picked two of them:
+* 		Rewarded Interstitial – a full-screen ad that leads to an offer page after a user clicks it. It appears after a user requests to watch an ad to get a reward in return.
+* 		Rewarded Popup – almost the same as Rewarded Interstitial, but when a user requests to watch an ad for a reward, they are redirected right to the offer page.
+They also tried In-Page Push as an experiment, but it didn’t bring high enough CPM.
+All of the formats are added to the task feed, so a user is fully aware that they will see an ad and receive a reward after they watch it. Besides ad watching, the app owners have tasks from their partners: for example, a user needs to try another mini app or subscribe to some channel in Telegram
+1. To install SDK  copy this tag    and place it below the <head> tag of your app's source code.
+
+<script src='//libtl.com/sdk.js' data-zone='9524219' data-sdk='show_9524219'></script>
+
+2-   To start displaying ads activate the formats below.
+
+Rewarded Interstitial
+Native banner with reward for viewing. Click on it leads to offer page.
+
+Copy this function and call it on any page in your application.
+
+
+
+// Rewarded interstitial
+
+show_9524219().then(() => {
+    // You need to add your user reward function here, which will be executed after the user watches the ad.
+    // For more details, please refer to the detailed instructions.
+    alert('You have seen an ad!');
+})
+
+       
+
+3-  Rewarded Popup
+After click on your element user goes directly to offer page, without banner, and gets a reward.
+
+Copy this function and call it on any page in your application.
+
+
+
+// Rewarded Popup
+
+show_9524219('pop').then(() => {
+    // user watch ad till the end or close it in interstitial format
+    // your code to reward user for rewarded format
+}).catch(e => {
+    // user get error during playing ad
+    // do nothing or whatever you want
+})
+
+       
+
+4- In-app Interstitial
+Native banner shown according to your timeframe settings. No reward required.
+
+Copy this function and call it on any page in your application.
+
+
+
+// In-App Interstitial
+
+show_9524219({
+  type: 'inApp',
+  inAppSettings: {
+    frequency: 2,
+    capping: 0.1,
+    interval: 30,
+    timeout: 5,
+    everyPage: false
+  }
+})
+
+/*
+This value is decoded as follows:
+- show automatically 2 ads
+  within 0.1 hours (6 minutes)
+  with a 30-second interval between them
+  and a 5-second delay before the first one is shown.
+  The last digit, 0, means that the session will be saved when you navigate between pages.
+  If you set the last digit as 1, then at any transition between pages,
+  the session will be reset, and the ads will start again.
+*/
+
