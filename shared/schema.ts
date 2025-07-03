@@ -1,8 +1,8 @@
-import { pgTable, text, serial, integer, boolean, decimal, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, decimal, timestamp, type PgTableWithColumns } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
+export const users: PgTableWithColumns<any> = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
@@ -12,7 +12,7 @@ export const users = pgTable("users", {
   level: integer("level").default(1),
   experience: integer("experience").default(0),
   referralCode: text("referral_code").unique(),
-  referredBy: integer("referred_by").references(() => users.id),
+  referredBy: integer("referred_by").references((): any => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -66,10 +66,10 @@ export const achievements = pgTable("achievements", {
   unlockedAt: timestamp("unlocked_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  telegramId: true,
+export const insertUserSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+  telegramId: z.string().optional(),
 });
 
 export const insertAdViewSchema = createInsertSchema(adViews).pick({
