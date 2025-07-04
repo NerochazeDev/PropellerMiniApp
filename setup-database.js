@@ -1,6 +1,6 @@
 import { Client } from 'pg';
 
-const connectionString = 'postgresql://postgres:Hello10122%40@db.ocipsgjulyyujyvzhqjd.supabase.co:5432/postgres';
+const connectionString = 'postgresql://postgres:Omoolaomoola10122%40@db.ocipsgjulyyujyvzhqjd.supabase.co:5432/postgres';
 
 const createTables = async () => {
   const client = new Client({
