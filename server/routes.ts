@@ -86,15 +86,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
       `;
 
-      // Execute the SQL
-      const { data, error } = await supabase.rpc('exec_sql', {
-        sql: createTablesSQL
-      });
+      // Since supabase.rpc('exec_sql') might not be available, let's use direct SQL execution
+      try {
+        // Try to create tables using direct SQL queries
+        const { Client } = await import('pg');
+        const client = new Client({
+          connectionString: 'postgresql://postgres:Hello10122%40@db.ocipsgjulyyujyvzhqjd.supabase.co:5432/postgres',
+          ssl: { rejectUnauthorized: false }
+        });
+        
+        await client.connect();
 
-      if (error) {
-        console.error('Table creation error:', error);
-        // Try alternative method - execute each table separately
-        const tables = [
+        // Create tables
+        const tableQueries = [
           `CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             username TEXT NOT NULL UNIQUE,
@@ -122,17 +126,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status TEXT DEFAULT 'pending',
             requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             processed_at TIMESTAMP
+          );`,
+          `CREATE TABLE IF NOT EXISTS referrals (
+            id SERIAL PRIMARY KEY,
+            referrer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            referred_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(referrer_id, referred_id)
+          );`,
+          `CREATE TABLE IF NOT EXISTS commissions (
+            id SERIAL PRIMARY KEY,
+            referrer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            referred_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            amount DECIMAL(10, 6) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );`,
+          `CREATE TABLE IF NOT EXISTS achievements (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            achievement_type TEXT NOT NULL,
+            achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );`
         ];
 
-        // Create tables one by one
-        for (const sql of tables) {
-          try {
-            await supabase.rpc('exec_sql', { sql });
-          } catch (tableError) {
-            console.log('Individual table creation attempt:', tableError);
-          }
+        for (const query of tableQueries) {
+          await client.query(query);
         }
+        
+        await client.end();
+        console.log('✅ All tables created successfully via direct connection');
+      } catch (dbError) {
+        console.error('Direct database connection failed:', dbError);
+        // If direct connection fails, tables need to be created manually
+        throw new Error('Database tables must be created manually in Supabase dashboard');
       }
       
       // Test the tables
