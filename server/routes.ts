@@ -10,6 +10,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Test database connection and add test user
+  app.post('/api/test-database', async (req, res) => {
+    try {
+      console.log('🔍 Testing database connection...');
+      
+      // First, test basic Supabase connection
+      const { supabase } = await import("./db");
+      
+      // Try a simple query to check connection
+      console.log('🔗 Testing basic Supabase connection...');
+      const { data, error: healthError } = await supabase
+        .from('users')
+        .select('count', { count: 'exact', head: true });
+      
+      if (healthError) {
+        console.error('❌ Basic connection failed:', healthError);
+        throw new Error(`Database connection failed: ${healthError.message}`);
+      }
+      
+      console.log('✅ Basic connection successful');
+      
+      // Try to get user count
+      const { count, error: countError } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) {
+        console.error('❌ Count query failed:', countError);
+        throw new Error(`Count query failed: ${countError.message}`);
+      }
+      
+      console.log('📊 Total users in database:', count);
+      
+      res.json({ 
+        success: true, 
+        message: 'Database connection working', 
+        totalUsers: count || 0,
+        note: 'Basic connection test successful'
+      });
+      
+    } catch (error) {
+      console.error('❌ Database test failed:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Database connection failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Database setup endpoint
   app.post('/api/setup-database', async (req, res) => {
     try {
