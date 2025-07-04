@@ -10,6 +10,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Get all users for debugging
+  app.get('/api/users', async (req, res) => {
+    try {
+      console.log('👥 Fetching all users from database...');
+      const { supabase } = await import("./db");
+      const { data: users, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('❌ Error fetching users:', error);
+        throw error;
+      }
+      
+      console.log('📋 Current users in database:');
+      users?.forEach(user => {
+        console.log(`  - ID: ${user.id}, Username: ${user.username}, Telegram ID: ${user.telegram_id || 'N/A'}`);
+      });
+      
+      res.json({ 
+        success: true, 
+        users: users || [],
+        totalUsers: users?.length || 0
+      });
+      
+    } catch (error) {
+      console.error('❌ Failed to fetch users:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch users',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Test database connection and add test user
   app.post('/api/test-database', async (req, res) => {
     try {

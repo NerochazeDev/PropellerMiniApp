@@ -66,5 +66,28 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Check initial user data on startup
+    setTimeout(async () => {
+      try {
+        const { supabase } = await import("./db");
+        const { data: users, error } = await supabase
+          .from('users')
+          .select('*')
+          .limit(5);
+        
+        if (error) {
+          console.error('❌ Error checking users on startup:', error);
+        } else {
+          console.log('👥 Current users in database on startup:');
+          users?.forEach(user => {
+            console.log(`  - ID: ${user.id}, Username: ${user.username}, Telegram ID: ${user.telegram_id || 'N/A'}`);
+          });
+          console.log(`📊 Total users found: ${users?.length || 0}`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to check users on startup:', error);
+      }
+    }, 2000); // Wait 2 seconds for the server to fully start
   });
 })();
