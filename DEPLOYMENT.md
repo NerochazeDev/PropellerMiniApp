@@ -21,9 +21,6 @@
    SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
-4. **Health Check**
-   - **Health Check Path**: `/api/health`
-
 ## Alternative: One-Click Deploy
 
 If using the `render.yaml` file in this repository:
