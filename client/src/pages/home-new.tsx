@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useTelegram } from "@/hooks/use-telegram";
 import { useMonetag } from "@/hooks/use-monetag";
+import { useHaptics } from "@/hooks/use-haptics";
 import { StatusCard } from "@/components/status-card";
 import { AdButton } from "@/components/ad-button";
 import { MessageCard } from "@/components/message-card";
+import { FloatingReward } from "@/components/floating-reward";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Rocket, Star, Crown, Zap, TrendingUp, Wallet } from "lucide-react";
@@ -23,12 +25,15 @@ interface User {
 export default function Home() {
   const { isReady, isInTelegram, webApp } = useTelegram();
   const { isLoading, showRewardedInterstitial, showRewardedPopup } = useMonetag();
+  const { buttonHaptic, rewardHaptic, successHaptic } = useHaptics();
   const queryClient = useQueryClient();
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showFloatingReward, setShowFloatingReward] = useState(false);
+  const [lastReward, setLastReward] = useState(0);
 
   // User creation/fetching
   const createUserMutation = useMutation({
@@ -59,6 +64,11 @@ export default function Home() {
     onSuccess: (data: any) => {
       setCurrentUser(data.user);
       setShowSuccess(true);
+      // Show floating reward animation with haptic feedback
+      setLastReward(0.001); // Realistic reward amount
+      setShowFloatingReward(true);
+      rewardHaptic(); // Triple haptic for reward
+      successHaptic(); // Success notification
       console.log("✅ Real Monetag earnings recorded:", data.adView);
     },
     onError: (error: any) => {
@@ -104,6 +114,9 @@ export default function Home() {
       return;
     }
 
+    // Trigger haptic feedback on button press
+    buttonHaptic();
+    
     setShowSuccess(false);
     setShowError(false);
     
@@ -255,6 +268,13 @@ export default function Home() {
         title="Error"
         message={errorMessage}
         show={showError}
+      />
+      
+      {/* Floating Reward Animation */}
+      <FloatingReward
+        show={showFloatingReward}
+        amount={lastReward}
+        onComplete={() => setShowFloatingReward(false)}
       />
     </div>
   );
