@@ -1,13 +1,12 @@
 -- PropellerAds Telegram Mini App Database Setup
 -- Copy and paste this into your Supabase SQL Editor
 
--- Create users table
+-- Create users table (without password column to match your current schema)
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
-  password TEXT NOT NULL,
   telegram_id TEXT UNIQUE,
-  total_rewards DECIMAL(10, 6) DEFAULT 0.000000,
+  total_rewards DECIMAL(10, 2) DEFAULT 0.00,
   ads_watched INTEGER DEFAULT 0,
   level INTEGER DEFAULT 1,
   experience INTEGER DEFAULT 0,
@@ -21,17 +20,16 @@ CREATE TABLE IF NOT EXISTS ad_views (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   ad_type TEXT NOT NULL,
-  reward_amount DECIMAL(10, 6) NOT NULL,
-  viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  reward_amount DECIMAL(10, 2) NOT NULL,
+  completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create withdrawals table
 CREATE TABLE IF NOT EXISTS withdrawals (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  amount DECIMAL(10, 6) NOT NULL,
-  method TEXT NOT NULL DEFAULT 'USDT_TRC20',
-  wallet_address TEXT NOT NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  method TEXT NOT NULL,
   status TEXT DEFAULT 'pending',
   requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   processed_at TIMESTAMP
@@ -42,9 +40,11 @@ CREATE TABLE IF NOT EXISTS referrals (
   id SERIAL PRIMARY KEY,
   referrer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   referred_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  signup_bonus DECIMAL(10, 6) DEFAULT 0.000000,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(referrer_id, referred_id)
+  signup_bonus DECIMAL(10, 2) DEFAULT 5.00,
+  total_commission_earned DECIMAL(10, 2) DEFAULT 0.00,
+  commission_rate DECIMAL(5, 4) DEFAULT 0.0500,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create commissions table
@@ -53,8 +53,8 @@ CREATE TABLE IF NOT EXISTS commissions (
   referrer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   referred_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   ad_view_id INTEGER NOT NULL REFERENCES ad_views(id) ON DELETE CASCADE,
-  original_amount DECIMAL(10, 6) NOT NULL,
-  commission_amount DECIMAL(10, 6) NOT NULL,
+  original_amount DECIMAL(10, 2) NOT NULL,
+  commission_amount DECIMAL(10, 2) NOT NULL,
   commission_rate DECIMAL(5, 4) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS achievements (
   type TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
-  reward_amount DECIMAL(10, 6) DEFAULT 0.000000,
+  reward_amount DECIMAL(10, 2) DEFAULT 0.00,
   achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -79,9 +79,9 @@ CREATE INDEX IF NOT EXISTS idx_referrals_referrer_id ON referrals(referrer_id);
 CREATE INDEX IF NOT EXISTS idx_commissions_referrer_id ON commissions(referrer_id);
 CREATE INDEX IF NOT EXISTS idx_achievements_user_id ON achievements(user_id);
 
--- Insert a test user to verify the setup
-INSERT INTO users (username, password, telegram_id, referral_code) 
-VALUES ('test_user', 'test_password', '123456789', 'TEST001')
+-- Insert a test user to verify the setup (without password column)
+INSERT INTO users (username, telegram_id, referral_code) 
+VALUES ('test_user', '123456789', 'TEST001')
 ON CONFLICT (username) DO NOTHING;
 
 -- Verify tables were created
