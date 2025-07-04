@@ -57,7 +57,7 @@ This is a Telegram Mini App built with React and Express that integrates Monetag
 ### Core Dependencies
 - **Monetag SDK**: External ad serving platform
 - **Telegram WebApp SDK**: Native Telegram integration
-- **Neon Database**: PostgreSQL database provider
+- **Supabase Database**: PostgreSQL database provider with API integration
 - **Drizzle ORM**: Type-safe database operations
 
 ### UI Dependencies
@@ -99,6 +99,7 @@ This is a Telegram Mini App built with React and Express that integrates Monetag
 - July 03, 2025. **AUTHENTICATION SECURITY**: Removed all demo accounts and simulation modes
 - July 03, 2025. **TELEGRAM VALIDATION**: Only authentic Telegram users can access and earn rewards
 - July 03, 2025. **FRAUD PREVENTION**: Rate limiting (30s between ads) and daily limits (50 ads) implemented
+- July 04, 2025. **SUPABASE MIGRATION**: Migrated from Neon to Supabase PostgreSQL with API integration
 
 ## User Preferences
 
