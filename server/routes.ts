@@ -15,24 +15,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { supabase } = await import("./db");
       
-      // Test connection
-      const { data, error } = await supabase.from('users').select('count', { count: 'exact' });
-      
+      // Create tables using Supabase SQL
+      const createTablesSQL = `
+        -- Create users table
+        CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          username TEXT NOT NULL UNIQUE,
+          telegram_id TEXT UNIQUE,
+          total_rewards DECIMAL(10, 6) DEFAULT 0.000000,
+          ads_watched INTEGER DEFAULT 0,
+          level INTEGER DEFAULT 1,
+          experience INTEGER DEFAULT 0,
+          referral_code TEXT UNIQUE,
+          referred_by INTEGER REFERENCES users(id),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Create ad_views table
+        CREATE TABLE IF NOT EXISTS ad_views (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          ad_type TEXT NOT NULL,
+          reward_amount DECIMAL(10, 6) NOT NULL,
+          viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Create withdrawals table
+        CREATE TABLE IF NOT EXISTS withdrawals (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          amount DECIMAL(10, 6) NOT NULL,
+          wallet_address TEXT NOT NULL,
+          status TEXT DEFAULT 'pending',
+          requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          processed_at TIMESTAMP
+        );
+
+        -- Create referrals table
+        CREATE TABLE IF NOT EXISTS referrals (
+          id SERIAL PRIMARY KEY,
+          referrer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          referred_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(referrer_id, referred_id)
+        );
+
+        -- Create commissions table
+        CREATE TABLE IF NOT EXISTS commissions (
+          id SERIAL PRIMARY KEY,
+          referrer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          referred_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          amount DECIMAL(10, 6) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Create achievements table
+        CREATE TABLE IF NOT EXISTS achievements (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          achievement_type TEXT NOT NULL,
+          achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Enable Row Level Security
+        ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE ad_views ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE withdrawals ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE commissions ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
+      `;
+
+      // Execute the SQL
+      const { data, error } = await supabase.rpc('exec_sql', {
+        sql: createTablesSQL
+      });
+
       if (error) {
-        console.log('Database tables might not exist, they will be created automatically when needed');
+        console.error('Table creation error:', error);
+        // Try alternative method - execute each table separately
+        const tables = [
+          `CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username TEXT NOT NULL UNIQUE,
+            telegram_id TEXT UNIQUE,
+            total_rewards DECIMAL(10, 6) DEFAULT 0.000000,
+            ads_watched INTEGER DEFAULT 0,
+            level INTEGER DEFAULT 1,
+            experience INTEGER DEFAULT 0,
+            referral_code TEXT UNIQUE,
+            referred_by INTEGER REFERENCES users(id),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );`,
+          `CREATE TABLE IF NOT EXISTS ad_views (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            ad_type TEXT NOT NULL,
+            reward_amount DECIMAL(10, 6) NOT NULL,
+            viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );`,
+          `CREATE TABLE IF NOT EXISTS withdrawals (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            amount DECIMAL(10, 6) NOT NULL,
+            wallet_address TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            processed_at TIMESTAMP
+          );`
+        ];
+
+        // Create tables one by one
+        for (const sql of tables) {
+          try {
+            await supabase.rpc('exec_sql', { sql });
+          } catch (tableError) {
+            console.log('Individual table creation attempt:', tableError);
+          }
+        }
       }
       
+      // Test the tables
+      const { data: testData, error: testError } = await supabase.from('users').select('count', { count: 'exact' });
+      
       res.json({ 
-        success: true, 
-        message: 'Database connection verified',
+        success: !testError, 
+        message: testError ? 'Tables creation attempted, please check Supabase dashboard' : 'Database tables created successfully',
+        tableTest: !testError,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
       console.error('Database setup error:', error);
       res.status(500).json({ 
         success: false, 
-        message: 'Database setup failed',
-        error: error.message 
+        message: 'Database setup failed. Please create tables manually in Supabase dashboard.',
+        error: error.message,
+        instructions: 'Go to your Supabase dashboard > SQL Editor and run the table creation scripts'
       });
     }
   });
