@@ -91,7 +91,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Try to create tables using direct SQL queries
         const { Client } = await import('pg');
         const client = new Client({
-          connectionString: 'postgresql://postgres:Omoolaomoola10122%40@db.ocipsgjulyyujyvzhqjd.supabase.co:5432/postgres',
+          connectionString: 'postgresql://postgres:Omoolaomoola10122@@db.ocipsgjulyyujyvzhqjd.supabase.co:5432/postgres',
           ssl: { rejectUnauthorized: false }
         });
         

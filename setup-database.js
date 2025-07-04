@@ -107,14 +107,14 @@ const createTables = async () => {
       WHERE table_schema = 'public' 
       ORDER BY table_name;
     `);
-    
+
     console.log('\n📊 Database tables created successfully:');
     result.rows.forEach(row => {
       console.log(`  - ${row.table_name}`);
     });
 
     console.log('\n🎉 Database setup complete! All tables are ready for the PropellerAds Mini App.');
-    
+
   } catch (error) {
     console.error('❌ Database setup error:', error);
   } finally {
