@@ -1,10 +1,4 @@
 import {
-  users,
-  adViews,
-  withdrawals,
-  referrals,
-  commissions,
-  achievements,
   type User,
   type InsertUser,
   type AdView,
@@ -18,8 +12,7 @@ import {
   type Achievement,
   type InsertAchievement,
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, desc, sum } from "drizzle-orm";
+import { supabase } from "./db";
 
 export interface IStorage {
   // User operations

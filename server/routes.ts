@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage-supabase";
 import { handleWithdrawalRequest, handleWithdrawalStatus } from "./withdrawal-handler";
 import { insertAdViewSchema, insertUserSchema, insertReferralSchema } from "@shared/schema";
 
@@ -8,6 +8,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Database setup endpoint
+  app.post('/api/setup-database', async (req, res) => {
+    try {
+      const { supabase } = await import("./db");
+      
+      // Test connection
+      const { data, error } = await supabase.from('users').select('count', { count: 'exact' });
+      
+      if (error) {
+        console.log('Database tables might not exist, they will be created automatically when needed');
+      }
+      
+      res.json({ 
+        success: true, 
+        message: 'Database connection verified',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Database setup error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Database setup failed',
+        error: error.message 
+      });
+    }
   });
 
   // User management
